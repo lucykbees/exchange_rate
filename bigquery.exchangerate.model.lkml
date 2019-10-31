@@ -1,3 +1,3 @@
-connection: "bigquery_db"
+connection: "bigquery_db_us"
 
 include: "bigquery.explore"
