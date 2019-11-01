@@ -1,6 +1,11 @@
 view: bq_forex_historical_real {
   derived_table: {
-    sql: select x.day
+    sql:select x.day as day
+, (case when x.GBP_AUD is null then
+    (case when lag(x.GBP_AUD, 1) over (order by x.day) is null then
+      lag(x.GBP_AUD, 2) over (order by x.day)
+    Else lag(x.GBP_AUD, 1) over (order by x.day) End)
+  Else x.GBP_AUD End) as GBP_AUD
 , (case when x.AUD_USD is null then
     (case when lag(x.AUD_USD, 1) over (order by x.day) is null then
       lag(x.AUD_USD, 2) over (order by x.day)
@@ -85,25 +90,8 @@ from
       FROM calendar_day
       left join (
       SELECT
-        cast(forex.exchange_date as timestamp) AS forex_exchange_date,
-        forex.AUD_USD  AS AUD_USD,
-        forex.CHF_JPY  AS CHF_JPY,
-        forex.EUR_CHF  AS EUR_CHF,
-        forex.EUR_GBP  AS EUR_GBP,
-        forex.EUR_JPY  AS EUR_JPY,
-        forex.EUR_USD  AS EUR_USD,
-        forex.GBP_CHF  AS GBP_CHF,
-        forex.GBP_JPY  AS GBP_JPY,
-        forex.GBP_USD  AS GBP_USD,
-        forex.NZD_USD  AS NZD_USD,
-        forex.USD_CAD  AS USD_CAD,
-        forex.USD_CHF  AS USD_CHF,
-        forex.USD_JPY  AS USD_JPY
-      FROM `looker-datablocks.exchangerate.forex`  AS forex
-      Group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
-      Union All
-      SELECT
         cast(forex_real.exchange_date as timestamp) AS forex_exchange_date,
+        forex_real.AUD*(1/forex_real.GBP)  AS GBP_AUD,
         1/(forex_real.AUD*(1/forex_real.USD))  AS AUD_USD,
         1/(forex_real.CHF*(1/forex_real.JPY))  AS CHF_JPY ,
         forex_real.CHF  AS EUR_CHF,
@@ -118,18 +106,28 @@ from
         forex_real.CHF *(1/forex_real.USD) AS USD_CHF,
         forex_real.JPY *(1/forex_real.USD) AS USD_JPY
       FROM `looker-datablocks.exchangerate.forex_real_full`  AS forex_real
-      Group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+      Group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 ) as forex
     on forex.forex_exchange_date = calendar_day.day) as x
     order by day desc
        ;;
-    datagroup_trigger: default
+    persist_for: "24 hour"
   }
 
   dimension_group: forex_exchange {
     type: time
     timeframes: [date, week, month, year]
     sql: ${TABLE}.day ;;
+  }
+
+
+  dimension: gbp_aud {
+    label: "GBP/AUD"
+    description: "1 GBP = X Australian Dollar"
+    value_format_name: decimal_4
+    type:  number
+    sql: ${TABLE}.GBP_AUD ;;
+    hidden: yes
   }
 
   dimension: aud_usd {
@@ -242,6 +240,14 @@ from
   }
 
   ################################### measures to plot on graph ###################################
+
+  measure: gbpaud {
+    label: "GBP/AUD"
+    description: "1 Pound = X Australian Dollars"
+    value_format_name: decimal_4
+    type:  max
+    sql: ${gbp_aud} ;;
+  }
 
   measure: audusd {
     label: "AUD/USD"
