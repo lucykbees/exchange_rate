@@ -131,6 +131,15 @@ from
     hidden: yes
   }
 
+  dimension: gbp_cad {
+    label: "GBP/CAD"
+    description: "1 GBP = X Canadian Dollar"
+    value_format_name: decimal_4
+    type:  number
+    sql: ${TABLE}.GBP_CAD ;;
+    hidden: yes
+  }
+
   dimension: aud_usd {
     label: "AUD/USD"
     description: "1 Australian Dollar = X US Dollars"
