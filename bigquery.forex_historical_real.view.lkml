@@ -2,10 +2,10 @@ view: bq_forex_historical_real {
   derived_table: {
     sql:select x.day as day
 ,
-  (case when x.GBP_CAD is null then
-    (case when lag(x.GBP_CAD, 1) over (order by x.day) is null then
-      lag(x.GBP_CAD, 2) over (order by x.day)
-    Else lag(x.GBP_CAD, 1) over (order by x.day) End)
+  (case when x.GBP_AUD is null then
+    (case when lag(x.GBP_AUD, 1) over (order by x.day) is null then
+      lag(x.GBP_AUD, 2) over (order by x.day)
+    Else lag(x.GBP_AUD, 1) over (order by x.day) End)
   Else x.GBP_AUD End) as GBP_AUD
 , (case when x.AUD_USD is null then
     (case when lag(x.AUD_USD, 1) over (order by x.day) is null then
