@@ -137,7 +137,7 @@ from
     value_format_name: decimal_4
     type:  number
     sql: ${TABLE}.GBP_CAD ;;
-    hidden: yes
+    hidden: no
   }
 
   dimension: aud_usd {
