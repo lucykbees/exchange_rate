@@ -92,6 +92,7 @@ from
       SELECT
         cast(forex_real.exchange_date as timestamp) AS forex_exchange_date,
         forex_real.AUD*(1/forex_real.GBP)  AS GBP_AUD,
+        forex_real.CAD*(1/forex_real.GBP)  AS GBP_CAD,
         1/(forex_real.AUD*(1/forex_real.USD))  AS AUD_USD,
         1/(forex_real.CHF*(1/forex_real.JPY))  AS CHF_JPY ,
         forex_real.CHF  AS EUR_CHF,
